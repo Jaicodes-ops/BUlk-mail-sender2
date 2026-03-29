@@ -15,24 +15,20 @@ mongoose
 const credential = mongoose.model("credential", {}, "bulkmail");
 
 app.post("/sendmail", async (req, res) => {
-  const { msg, emaillist } = req.body;
+  res.send(true); // respond fast
 
-  res.send(true);
+  const msg = req.body.msg;
+  const emaillist = req.body.emaillist;
 
   try {
     const data = await credential.find();
 
-    if (!data || data.length === 0) {
-      console.log("No credentials found in DB");
-      return;
-    }
-
-    const user = data[0].toJSON().user;
-    const pass = data[0].toJSON().pass;
-
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { user, pass },
+      auth: {
+        user: data[0].user,
+        pass: data[0].pass,
+      },
     });
 
     for (let i = 0; i < emaillist.length; i++) {
@@ -44,19 +40,16 @@ app.post("/sendmail", async (req, res) => {
           text: msg,
         });
 
-        console.log("sent:", emaillist[i]);
+        console.log("email sent to:", emaillist[i]);
       } catch (err) {
-        console.log("failed:", emaillist[i], err.message);
+        console.log("failed:", emaillist[i]);
       }
     }
 
-    console.log("All emails processed");
-
   } catch (error) {
-    console.log("Server error:", error);
+    console.log("error:", error);
   }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("Server running on", PORT));
