@@ -30,16 +30,26 @@ function App() {
     reader.readAsBinaryString(fileinput);
   }
   function send() {
-    setStatus(true);
-    axios.post("http://localhost:5000/sendmail", { msg: msg,emaillist:emaillist }).then((res) => {
+  setStatus(true);
+  axios
+    .post("https://bulk-mail-sender2-1.onrender.com/sendmail", {
+      msg: msg,
+      emaillist: emaillist,
+    })
+    .then((res) => {
       if (res.data === true) {
         alert("email sent successfully");
         setStatus(false);
       } else {
         alert("email not sent");
+        setStatus(false);
       }
+    })
+    .catch(() => {
+      alert("server error");
+      setStatus(false);
     });
-  }
+}
   return (
     <>
       <div className="bg-blue-950 text-white text-center">
